@@ -1,0 +1,29 @@
+@import 'tailwindcss';
+
+/*
+ * Строгая палитра: в проекте доступны только эти цвета и один радиус.
+ * Все дефолтные цвета/радиусы Tailwind отключены (bg-blue-500 и т.п. не сгенерируются).
+ */
+@theme {
+    --color-*: initial;
+    --color-transparent: transparent;
+    --color-current: currentColor;
+
+    --color-red: #e11d2e;
+    --color-red-dark: #b3121f;
+
+    --color-black: #0a0a0a;
+
+    --color-gray-dark: #1f1f1f;
+    --color-gray: #6b6b6b;
+    --color-gray-light: #d4d4d4;
+
+    --color-white: #ffffff;
+
+    --radius-*: initial;
+    --radius-main: 20px;
+}
+
+body {
+    @apply bg-black text-white antialiased;
+}
