@@ -1,29 +1,94 @@
 @import 'tailwindcss';
 
 /*
- * Строгая палитра: в проекте доступны только эти цвета и один радиус.
- * Все дефолтные цвета/радиусы Tailwind отключены (bg-blue-500 и т.п. не сгенерируются).
+ * Дизайн-система: только семантические токены, конкретные цвета задаёт тема.
+ * Дефолтные цвета и радиусы Tailwind отключены (bg-blue-500 не сгенерируется),
+ * поэтому всё оформление идёт через bg-surface, text-muted, border-line и т.д.
+ *
+ * Тема переключается атрибутом data-theme на <html> — см. lib/theme.ts.
  */
-@theme {
+@theme inline {
     --color-*: initial;
     --color-transparent: transparent;
     --color-current: currentColor;
 
-    --color-red: #e11d2e;
-    --color-red-dark: #b3121f;
-
-    --color-black: #0a0a0a;
-
-    --color-gray-dark: #1f1f1f;
-    --color-gray: #6b6b6b;
-    --color-gray-light: #d4d4d4;
-
-    --color-white: #ffffff;
+    --color-bg: var(--bg);
+    --color-surface: var(--surface);
+    --color-surface-2: var(--surface-2);
+    --color-surface-3: var(--surface-3);
+    --color-line: var(--line);
+    --color-fg: var(--fg);
+    --color-muted: var(--muted);
+    --color-subtle: var(--subtle);
+    --color-accent: var(--accent);
+    --color-accent-hover: var(--accent-hover);
+    --color-accent-soft: var(--accent-soft);
+    --color-on-accent: #ffffff;
+    --color-success: var(--success);
+    --color-overlay: var(--overlay);
 
     --radius-*: initial;
-    --radius-main: 20px;
+    /* Дизайн целиком на скруглениях: острых углов в интерфейсе нет. */
+    --radius-sm: 10px;
+    --radius-md: 14px;
+    --radius-lg: 20px;
+    --radius-xl: 28px;
+    --radius-full: 9999px;
+
+    --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Тёмная — по умолчанию: красный акцент на почти чёрном, как у Kick. */
+:root,
+[data-theme='dark'] {
+    color-scheme: dark;
+    --bg: #0b0b0d;
+    --surface: #131316;
+    --surface-2: #1b1b20;
+    --surface-3: #25252c;
+    --line: #2a2a31;
+    --fg: #f4f4f5;
+    --muted: #a1a1aa;
+    --subtle: #6b6b76;
+    --accent: #e11d2e;
+    --accent-hover: #f0303f;
+    --accent-soft: rgb(225 29 46 / 0.14);
+    --success: #22c55e;
+    --overlay: rgb(0 0 0 / 0.6);
+}
+
+[data-theme='light'] {
+    color-scheme: light;
+    --bg: #f4f4f6;
+    --surface: #ffffff;
+    --surface-2: #f0f0f3;
+    --surface-3: #e6e6eb;
+    --line: #e2e2e8;
+    --fg: #0b0b0d;
+    --muted: #52525b;
+    --subtle: #8a8a94;
+    --accent: #e11d2e;
+    --accent-hover: #c81625;
+    --accent-soft: rgb(225 29 46 / 0.1);
+    --success: #16a34a;
+    --overlay: rgb(0 0 0 / 0.45);
 }
 
 body {
-    @apply bg-black text-white antialiased;
+    @apply bg-bg font-sans text-fg antialiased;
+}
+
+/* Тонкий скроллбар в тон теме: стандартный белый на тёмном фоне режет глаз. */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--surface-3) transparent;
+}
+
+::selection {
+    background: var(--accent-soft);
+}
+
+:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
 }

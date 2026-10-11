@@ -1,8 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { socket } from '@socket/socket.client';
-import { SocketEvent } from '@socket/socket.events';
+import { sendChatMessage } from '@socket/socket.client';
 import { useAppSelector } from '@store/hooks';
 import type { FormEvent } from 'react';
 import type { ChatMessage } from '@models/realtime';
@@ -35,7 +34,7 @@ export const useChat = (): UseChat => {
         if (!canSend || channelId === null) {
             return;
         }
-        socket.emit(SocketEvent.ChatSend, { channelId, text: trimmed.slice(0, MAX_LENGTH) });
+        sendChatMessage(channelId, trimmed.slice(0, MAX_LENGTH));
         setText('');
     };
 

@@ -1,6 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { channelReducer } from '@store/slices/channel.slice';
 import { chatReducer } from '@store/slices/chat.slice';
+import { followsReducer } from '@store/slices/follows.slice';
 import { userReducer } from '@store/slices/user.slice';
 
 export const makeStore = () =>
@@ -9,6 +10,7 @@ export const makeStore = () =>
             user: userReducer,
             channel: channelReducer,
             chat: chatReducer,
+            follows: followsReducer,
         },
     });
 

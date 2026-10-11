@@ -1,3 +1,4 @@
+import { fieldClass } from '@ui/Input';
 import type { ReactNode, SelectHTMLAttributes } from 'react';
 
 export interface SelectOption {
@@ -20,11 +21,11 @@ export const Select = ({
     ...rest
 }: SelectProps): ReactNode => {
     return (
-        <label htmlFor={id} className='flex flex-col gap-2'>
-            {label !== undefined && <span className='text-sm text-gray-light'>{label}</span>}
+        <label htmlFor={id} className='flex flex-col gap-1.5'>
+            {label !== undefined && <span className='text-sm font-medium text-muted'>{label}</span>}
             <select
                 id={id}
-                className={`rounded-main border border-gray bg-gray-dark px-5 py-3 text-white outline-none focus:border-red ${className}`}
+                className={`${fieldClass} ${className}`}
                 onChange={(event) => onChange(event.target.value)}
                 {...rest}
             >

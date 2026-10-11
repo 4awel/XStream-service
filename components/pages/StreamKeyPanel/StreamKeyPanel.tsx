@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { Button } from '@ui/Button';
+import { Card } from '@ui/Card';
+import { Notice } from '@ui/Notice';
 import { useStreamKey } from '@composables/useStreamKey';
 import type { ReactNode } from 'react';
 
@@ -15,25 +17,33 @@ interface FieldProps {
 
 const Field = ({ label, value, isSecret = false }: FieldProps): ReactNode => {
     const [isRevealed, setIsRevealed] = useState(false);
+    const [isCopied, setIsCopied] = useState(false);
     const isHidden = isSecret && !isRevealed;
 
+    const copy = (): void => {
+        navigator.clipboard
+            .writeText(value)
+            .then(() => {
+                setIsCopied(true);
+                setTimeout(() => setIsCopied(false), 1500);
+            })
+            .catch(() => undefined);
+    };
+
     return (
-        <div className='flex flex-col gap-2'>
-            <span className='text-sm text-gray-light'>{label}</span>
-            <div className='flex items-center gap-2'>
-                <code className='flex-1 truncate rounded-main border border-gray bg-gray-dark px-4 py-3 text-sm'>
+        <div className='flex flex-col gap-1.5'>
+            <span className='text-sm font-medium text-muted'>{label}</span>
+            <div className='flex flex-wrap items-center gap-2'>
+                <code className='min-w-0 flex-1 truncate rounded-md border border-line bg-surface-2 px-3.5 py-2.5 text-sm'>
                     {isHidden ? HIDDEN_PLACEHOLDER : value}
                 </code>
                 {isSecret && (
-                    <Button variant='ghost' onClick={() => setIsRevealed(!isRevealed)}>
+                    <Button variant='ghost' size='sm' onClick={() => setIsRevealed(!isRevealed)}>
                         {isRevealed ? 'Скрыть' : 'Показать'}
                     </Button>
                 )}
-                <Button
-                    variant='secondary'
-                    onClick={() => void navigator.clipboard.writeText(value).catch(() => undefined)}
-                >
-                    Копировать
+                <Button variant='secondary' size='sm' onClick={copy}>
+                    {isCopied ? 'Скопировано' : 'Копировать'}
                 </Button>
             </div>
         </div>
@@ -45,33 +55,44 @@ export const StreamKeyPanel = (): ReactNode => {
     const { streamKey, isLoading, error, isMissing, reset } = useStreamKey();
 
     return (
-        <section className='flex flex-col gap-4 rounded-main bg-gray-dark p-6'>
-            <div className='flex items-center justify-between gap-4'>
-                <h2 className='text-lg font-semibold'>Ключ для OBS</h2>
-                <Button variant='secondary' isLoading={isLoading} onClick={reset}>
-                    {isMissing ? 'Создать' : 'Сбросить'}
+        <Card
+            title='Ключ трансляции'
+            description='Никому не показывайте ключ: с ним можно вещать на вашем канале'
+            actions={
+                <Button
+                    variant={isMissing ? 'primary' : 'danger'}
+                    size='sm'
+                    isLoading={isLoading}
+                    onClick={reset}
+                >
+                    {isMissing ? 'Создать ключ' : 'Сбросить'}
                 </Button>
-            </div>
+            }
+        >
+            <div className='flex flex-col gap-4'>
+                {error !== null && <Notice tone='error'>{error}</Notice>}
 
-            {error !== null && <p className='text-sm text-red'>{error}</p>}
-
-            {isMissing && (
-                <p className='text-sm text-gray-light'>
-                    Ключа пока нет. Нажмите «Создать» — он появится сразу.
-                </p>
-            )}
-
-            {streamKey !== null && (
-                <>
-                    <Field label='Сервер' value={streamKey.server} />
-                    <Field label='Ключ потока' value={streamKey.streamKey} isSecret />
-                    <p className='text-sm text-gray'>
-                        OBS → Настройки → Вещание → Сервис «Настраиваемый...», затем вставьте эти
-                        два поля и нажмите «Начать трансляцию». Сброс ключа немедленно отключает
-                        того, кто вещает по старому.
+                {isMissing && (
+                    <p className='text-sm text-muted'>
+                        Ключа пока нет. Нажмите «Создать ключ» — он появится сразу.
                     </p>
-                </>
-            )}
-        </section>
+                )}
+
+                {streamKey !== null && (
+                    <>
+                        <Field label='Сервер' value={streamKey.server} />
+                        <Field label='Ключ потока' value={streamKey.streamKey} isSecret />
+                        <ol className='flex list-decimal flex-col gap-1 rounded-md bg-surface-2 py-3 pr-4 pl-8 text-sm text-muted'>
+                            <li>OBS → Настройки → Трансляция</li>
+                            <li>Сервис: «Настраиваемый...»</li>
+                            <li>Вставьте «Сервер» и «Ключ потока», нажмите «Начать трансляцию»</li>
+                        </ol>
+                        <p className='text-xs text-subtle'>
+                            Сброс ключа сразу отключает того, кто вещает по старому.
+                        </p>
+                    </>
+                )}
+            </div>
+        </Card>
     );
 };

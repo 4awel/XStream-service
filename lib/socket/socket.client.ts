@@ -40,6 +40,11 @@ export const leaveChannel = (): void => {
     currentChannelId = null;
 };
 
+/** Отправить сообщение в чат текущей комнаты. Сервер разошлёт `chat_message` всем, включая отправителя. */
+export const sendChatMessage = (channelId: string, text: string): void => {
+    socket.emit(SocketEvent.ChatSend, { channelId, text });
+};
+
 // после реконнекта сервер забывает комнаты — заходим заново
 socket.on('connect', () => {
     if (currentChannelId !== null) {
