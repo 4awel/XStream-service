@@ -1,4 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import type { PayloadAction } from '@reduxjs/toolkit';
+import type { Channel } from '@models/channel';
 import { AuthService } from '@services/auth.service';
 import { UserService } from '@services/user.service';
 import { getErrorMessage } from '@store/utils';
@@ -64,13 +66,27 @@ export const loginUser = createAsyncThunk<User, Credentials, ThunkConfig>(
     },
 );
 
+/**
+ * Выход. Сессию обязательно гасим на сервере: без этого cookie остаётся рабочей,
+ * и «выход» означал бы лишь очистку стора — достаточно обновить страницу,
+ * чтобы снова оказаться внутри.
+ */
+export const logout = createAsyncThunk<void, void, ThunkConfig>('user/logout', async () => {
+    await AuthServiceClass.logout();
+});
+
 const userSlice = createSlice({
     name: 'user',
     initialState,
     reducers: {
-        // TODO: на сервере нет /auth/logout — сейчас чистится только стор
-        logout: (state) => {
-            state.user = null;
+        /** Ответы ручек профиля возвращают пользователя целиком — просто подменяем. */
+        userUpdated: (state, action: PayloadAction<User>) => {
+            state.user = action.payload;
+        },
+        channelUpdated: (state, action: PayloadAction<Channel>) => {
+            if (state.user !== null) {
+                state.user.channel = action.payload;
+            }
         },
         resetAuthStep: (state) => {
             state.authStep = 'credentials';
@@ -89,6 +105,16 @@ const userSlice = createSlice({
                 state.authStep = 'verify';
                 state.pendingEmail = action.payload;
             });
+
+        // Локально выходим в любом случае: если запрос не прошёл, потому что
+        // сессия уже истекла, держать пользователя в сторе тем более незачем.
+        [logout.fulfilled, logout.rejected].forEach((matcher) => {
+            builder.addCase(matcher, (state) => {
+                state.user = null;
+                state.isLoading = false;
+                state.error = null;
+            });
+        });
 
         [verifyEmail, loginUser].forEach((thunk) => {
             builder.addCase(thunk.fulfilled, (state, action) => {
@@ -113,5 +139,5 @@ const userSlice = createSlice({
     },
 });
 
-export const { logout, resetAuthStep } = userSlice.actions;
+export const { resetAuthStep, userUpdated, channelUpdated } = userSlice.actions;
 export const userReducer = userSlice.reducer;

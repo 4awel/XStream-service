@@ -9,6 +9,12 @@ export interface ChatMessage {
     createdAt: string;
 }
 
+/** Страница истории чата текущего эфира. */
+export interface ChatHistory {
+    items: ChatMessage[];
+    hasMore: boolean;
+}
+
 export interface FollowEvent {
     channelId: string;
     userId: string;

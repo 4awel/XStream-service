@@ -22,4 +22,8 @@ export class AuthService {
             password: credentials.password,
         });
     }
+
+    async logout(): Promise<void> {
+        await api.post('/auth/logout');
+    }
 }

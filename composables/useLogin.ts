@@ -1,6 +1,5 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@store/hooks';
 import { loginUser, registerUser, resetAuthStep, verifyEmail } from '@store/slices/user.slice';
@@ -24,17 +23,19 @@ interface UseLogin {
     submitCredentials: (event: FormEvent<HTMLFormElement>) => Promise<void>;
     submitCode: (event: FormEvent<HTMLFormElement>) => Promise<void>;
     backToCredentials: () => void;
+    /** Куда уйти после успеха; null — остаёмся. Навигацию делает страница. */
+    redirectTo: string | null;
 }
 
-/** Регистрация: email+пароль → код на почту → /auth/verify → сессия. */
-export const useLogin = (): UseLogin => {
+/** Регистрация: email+пароль → код на почту → /auth/verify → сессия → онбординг. */
+export const useLogin = (initialMode: AuthMode): UseLogin => {
     const dispatch = useAppDispatch();
-    const router = useRouter();
     const { authStep, pendingEmail, isLoading, error } = useAppSelector((state) => state.user);
-    const [mode, setMode] = useState<AuthMode>('login');
+    const [mode, setMode] = useState<AuthMode>(initialMode);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [code, setCode] = useState('');
+    const [redirectTo, setRedirectTo] = useState<string | null>(null);
 
     const submitCredentials = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
         event.preventDefault();
@@ -47,7 +48,7 @@ export const useLogin = (): UseLogin => {
 
         const result = await dispatch(loginUser(credentials));
         if (loginUser.fulfilled.match(result)) {
-            router.push('/');
+            setRedirectTo('/');
         }
     };
 
@@ -58,7 +59,8 @@ export const useLogin = (): UseLogin => {
         }
         const result = await dispatch(verifyEmail({ email: pendingEmail, code: code.trim() }));
         if (verifyEmail.fulfilled.match(result)) {
-            router.push('/');
+            // Новый аккаунт — сразу на выбор интересов.
+            setRedirectTo('/onboarding');
         }
     };
 
@@ -83,5 +85,6 @@ export const useLogin = (): UseLogin => {
         submitCredentials,
         submitCode,
         backToCredentials,
+        redirectTo,
     };
 };
