@@ -11,7 +11,7 @@
   # (иначе Safari и режимы без сторонних cookie ломают вход).
   NEXT_PUBLIC_API_URL = "/api"
   # Netlify не проксирует WebSocket — сокет идёт на Render напрямую.
-  NEXT_PUBLIC_WS_URL = "https://xstream-api.onrender.com"
+  NEXT_PUBLIC_WS_URL = "https://xstream-api-tkcw.onrender.com"
   # Медиасервера нет: плеер просто не найдёт поток.
   NEXT_PUBLIC_MEDIA_HLS_URL = "https://media.invalid"
   NEXT_PUBLIC_MEDIA_WEBRTC_URL = "https://media.invalid/webrtc"
@@ -20,6 +20,6 @@
 # поэтому, если Render выдал другой адрес, поменяйте его здесь и в NEXT_PUBLIC_WS_URL.
 [[redirects]]
   from = "/api/*"
-  to = "https://xstream-api.onrender.com/:splat"
+  to = "https://xstream-api-tkcw.onrender.com/:splat"
   status = 200
   force = true
